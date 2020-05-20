@@ -33,6 +33,8 @@ public:
 	QImage* loadNcFileToTexture( NcFile *pNcFile , osg::ref_ptr<osg::Vec3Array>& pV3Array);
 	QImage* GetPartNcFile(NcFile *pNcFile, osg::Vec3 p1, osg::Vec3 p2, int iMode);
 	QImage* GetSectionNcFile(NcFile *pNcFile, osg::Vec3 p1, osg::Vec3 p2);
+	int ExportPartNcFile(NcFile *pNcFile, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile);
+	int ExportSectionFile(NcFile *pNcFile, osg::Vec3 p1, osg::Vec3 p2, const QString& strExortFile);
 private:
 	goto_gis::CoordinateTransform* m_pCoordinateTransform;
 };

@@ -45,6 +45,8 @@ public:
 	virtual void SetRectColor(const std::string& strName, int i, const osg::Vec4& color) = 0;
 	virtual QImage* ClipNcFile(const std::string& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode) = 0;
 	virtual QImage* GetSectionNcFile( const std::string& strName, osg::Vec3 p1, osg::Vec3 p2 ) = 0;
+	virtual int ExportPartNcFile(const QString& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile) = 0;
+	virtual int ExportSctionFile(const QString& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile) = 0;
 	//virtual void SectionFile(std::string& name);
 };
 

@@ -108,6 +108,8 @@ public:
 	virtual QImage* ClipNcFile(const std::string& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode);
 	virtual QImage*  GetSectionNcFile( const std::string& strName, osg::Vec3 p1, osg::Vec3 p2 );
 
+	virtual int ExportPartNcFile(const QString& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile);
+	virtual int ExportSctionFile(const QString& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile);
 private:
 	NetCDFDataProvider* m_pNetCDFDataProvider;
 	//RadarGeometry* m_pRadarGeometry;

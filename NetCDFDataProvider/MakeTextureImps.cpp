@@ -8,6 +8,8 @@
 //	QColor(220, 0, 64),     QColor(224, 128, 192), QColor(160, 32, 192),  QColor(255, 255, 255)
 //};
 #define compute_distance(x1,x2,y1,y2) sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
+#define CSV_LINE(stream, v1, v2, v3, v4) stream<<v1<<QString::fromLocal8Bit(",")<<v2<<QString::fromLocal8Bit(",")<<v3<<QString::fromLocal8Bit(",")<<v4<<endl
+#define MAKE_CSV_LINE(v1, v2, v3, v4) v1 + QString::fromLocal8Bit(",") + v2 + QString::fromLocal8Bit(",") + v3 + QString::fromLocal8Bit(",") + v4 + "\n"
 
 QColor gColorTable[] = 
 {
@@ -1330,4 +1332,301 @@ bool MakeTextureImps::loadNcFileToGeometry( NcFile *pNcFile, osg::ref_ptr<osg::V
 
 	//NcBool ncR = pNcFile->close();
 	return true;
+}
+
+int MakeTextureImps::ExportPartNcFile(NcFile *pNcFile, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile)
+{
+	long m_x, m_y, m_z;
+	int lonFistIndex(0), latFistIndex(0), lonLastIndex(0), latLastIndex(0);
+	//获得维度
+	const int iDims = pNcFile->num_dims();
+	for(int i = 0; iDims > i; i++)
+	{
+		NcDim* pNcDim = pNcFile->get_dim(i);
+		std::string strDimName = pNcDim->name();
+		if(strDimName == "longtitude")
+		{
+			m_x = pNcDim->size();
+		}
+		else if(strDimName == "latitude")
+		{
+			m_y = pNcDim->size();
+		}
+		else if(strDimName == "layer")
+		{
+			m_z = pNcDim->size();
+		}
+		else
+		{
+			//pNcFile->close();
+			return 0;
+		}
+	}
+	//获得属性
+	const int iAtts = pNcFile->num_atts();
+
+	float fFirstLon = 0;
+	float fFirstLat = 0;
+	float fLastLon = 0;
+	float fLastLat = 0;
+
+	for(int i = 0; iAtts > i; i++)
+	{
+		NcAtt* pNcAtt = pNcFile->get_att(i);
+		std::string strAttName = pNcAtt->name();
+		if(strAttName.find("FirstLon") != std::string::npos)
+		{
+			fFirstLon = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("FirstLat") != std::string::npos)
+		{
+			fFirstLat = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("LastLon") != std::string::npos)
+		{
+			fLastLon = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("LastLat") != std::string::npos)
+		{
+			fLastLat = pNcAtt->as_float(0);
+		}
+	}
+
+	/*lonFistIndex = (p1.x() - fFirstLon) * 100;
+	lonLastIndex = (p2.x() - fFirstLon) * 100;
+
+	latFistIndex = (p2.y() - fFirstLat) * 100;
+	latLastIndex = (p1.y() - fFirstLat) * 100;*/
+
+	lonFistIndex = (p1.x() - fFirstLon)/0.01;
+	lonLastIndex = (p2.x() - fFirstLon)/0.01;
+
+	latFistIndex = (p2.y() - fFirstLat)/0.01;
+	latLastIndex = (p1.y() - fFirstLat)/0.01;
+
+	int m_xLen(lonLastIndex - lonFistIndex + 1), m_yLen(latLastIndex - latFistIndex + 1);
+
+	//QImage* pImage = new QImage(m_xLen, m_yLen, QImage::Format_RGB32);
+	//pImage->fill(QColor(255, 255, 255));
+	QFile csvFile(strExortFile);
+	if(!csvFile.open(QIODevice::Truncate|QIODevice::WriteOnly|QIODevice::Text)) return 0;
+	QTextStream ts(&csvFile);
+	/*ts<<QString::fromLocal8Bit("lon")<<QString::fromLocal8Bit(",")
+		<<QString::fromLocal8Bit("lat")<<QString::fromLocal8Bit(",")
+		<<QString::fromLocal8Bit("la")<<QString::fromLocal8Bit(",")
+		<<QString::fromLocal8Bit("value")<<endl;*/
+	CSV_LINE(ts, QString::fromLocal8Bit("lon"), QString::fromLocal8Bit("lat"), QString::fromLocal8Bit("layer"), QString::fromLocal8Bit("value"));
+	QString* bufferString = new QString();
+	const int iVars = pNcFile->num_vars();
+	for(int i = 0; i < iVars; ++i)
+	{
+		NcVar* pVar =  pNcFile->get_var(i);
+		if(!pVar)
+		{
+			return 0;
+		}
+		QString name = pVar->name();
+
+		if(name == QString::fromLocal8Bit("reflectivity"))
+		{
+			ncbyte* pData = new ncbyte[m_xLen];
+			
+			for(int ii = 0; m_z > ii; ii++)
+			{
+				long lCur[3] = {0};
+
+				if(iMode > -1 && iMode < m_z)
+				{
+					if(ii != iMode)
+						continue;
+				}
+
+				lCur[0] = ii;
+				
+				bufferString->clear();
+				for(int iii = 0; iii < m_yLen; iii++)
+				{
+					lCur[1] = latFistIndex + iii;
+					lCur[2] = lonFistIndex;
+					pVar->set_cur(lCur);
+
+					long laCount[3] = {0};
+					laCount[0] = 1;
+					laCount[1] = 1;
+					laCount[2] = m_xLen;
+
+					memset(pData, 0, sizeof(ncbyte) * m_xLen);
+					pVar->get(pData, laCount);
+
+					for(int j = 0; j < m_xLen; j++)
+					{
+						ncbyte shN = *(pData + j);
+
+						float fLon = p1.x() + 0.01 * j;
+						float fLat = p1.y() - 0.01 * iii;
+						int fLayer = 500 + 500 * ii;
+						ncbyte fValue = shN;
+
+						QString v1("%1"), v2("%1"), v3("%1"), v4("%1");
+						v1 = v1.arg((double)fLon, 0, 'f', 2);
+						v2 = v2.arg((double)fLat, 0, 'f', 2);
+						v3 = v3.arg((int)fLayer);
+						v4 = v4.arg((int)fValue);
+
+						QString temp = MAKE_CSV_LINE(v1, v2, v3, v4);
+						bufferString->push_back(temp);
+						//CSV_LINE(ts, v1, v2, v3, v4);
+					}
+				}
+
+				ts<<*bufferString;
+			}
+
+			delete[] pData;
+		}
+	}
+
+	delete bufferString;
+	csvFile.close();
+	return 1;
+}
+
+int MakeTextureImps::ExportSectionFile(NcFile *pNcFile, osg::Vec3 p1, osg::Vec3 p2, const QString& strExortFile)
+{
+	long m_x, m_y, m_z;
+	int lonFistIndex(0), latFistIndex(0), lonLastIndex(0), latLastIndex(0);
+	//获得维度
+	const int iDims = pNcFile->num_dims();
+	for(int i = 0; iDims > i; i++)
+	{
+		NcDim* pNcDim = pNcFile->get_dim(i);
+		std::string strDimName = pNcDim->name();
+		if(strDimName == "longtitude")
+		{
+			m_x = pNcDim->size();
+		}
+		else if(strDimName == "latitude")
+		{
+			m_y = pNcDim->size();
+		}
+		else if(strDimName == "layer")
+		{
+			m_z = pNcDim->size();
+		}
+		else
+		{
+			//pNcFile->close();
+			return 0;
+		}
+	}
+	//获得属性
+	const int iAtts = pNcFile->num_atts();
+
+	float fFirstLon = 0;
+	float fFirstLat = 0;
+	float fLastLon = 0;
+	float fLastLat = 0;
+
+	QFile csvFile(strExortFile);
+	if(!csvFile.open(QIODevice::Truncate|QIODevice::WriteOnly|QIODevice::Text)) return 0;
+	QTextStream ts(&csvFile);
+	
+	CSV_LINE(ts, QString::fromLocal8Bit("lon"), QString::fromLocal8Bit("lat"), QString::fromLocal8Bit("layer"), QString::fromLocal8Bit("value"));
+	QString* bufferString = new QString();
+
+	for(int i = 0; iAtts > i; i++)
+	{
+		NcAtt* pNcAtt = pNcFile->get_att(i);
+		std::string strAttName = pNcAtt->name();
+		if(strAttName.find("FirstLon") != std::string::npos)
+		{
+			fFirstLon = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("FirstLat") != std::string::npos)
+		{
+			fFirstLat = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("LastLon") != std::string::npos)
+		{
+			fLastLon = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("LastLat") != std::string::npos)
+		{
+			fLastLat = pNcAtt->as_float(0);
+		}
+	}
+
+	lonFistIndex = (p1.x() - fFirstLon)/0.01;
+	lonLastIndex = (p2.x() - fFirstLon)/0.01;
+
+	int m_xLen(lonLastIndex - lonFistIndex + 1)/*, m_yLen(latLastIndex - latFistIndex + 1)*/;
+	struct pairValue
+	{
+		int x, y;
+	};
+
+	ncbyte* tempBuffer = new ncbyte[m_xLen * 20];
+	memset(tempBuffer, -100, m_xLen * 20);
+
+	const int iVars = pNcFile->num_vars();
+	for(int i = 0; i < iVars; ++i)
+	{
+		NcVar* pVar =  pNcFile->get_var(i);
+		if(!pVar)
+		{
+			return 0;
+		}
+		QString name = pVar->name();
+
+		if(name == QString::fromLocal8Bit("reflectivity"))
+		{
+			ncbyte pValue = -100;
+
+			for(int ii = 0; m_z > ii; ii++)
+			{
+				long lCur[3] = {0};
+				lCur[0] = ii;
+
+				long laCount[3] = {0};
+				laCount[0] = 1;
+				laCount[1] = 1;
+				laCount[2] = 1;
+
+				for(int i = 0; i < m_xLen; i++)
+				{
+					pValue = -100;
+					float x = p1.x() + i*0.01;
+					float y = ((x-p1.x())/(p2.x() - p1.x()) + p1.y()/(p2.y() - p1.y())) * (p2.y() - p1.y());
+
+					int iYindex = (y - fFirstLat)/0.01;
+
+					int iXindex = lonFistIndex + i;
+
+					lCur[1] = iYindex;
+					lCur[2] = iXindex;
+					pVar->set_cur(lCur);
+					
+					pVar->get(&pValue, laCount);
+					
+					int fLayer = 500 + 500 * ii;
+
+					QString v1("%1"), v2("%1"), v3("%1"), v4("%1");
+						v1 = v1.arg((double)x, 0, 'f', 2);
+						v2 = v2.arg((double)y, 0, 'f', 2);
+						v3 = v3.arg((int)fLayer);
+						v4 = v4.arg((int)pValue);
+
+						QString temp = MAKE_CSV_LINE(v1, v2, v3, v4);
+						bufferString->push_back(temp);
+					
+				}
+
+				ts<<*bufferString;
+			}
+		}
+	}
+
+	
+
+	return 1;
 }
