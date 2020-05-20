@@ -205,6 +205,7 @@ MainWindow::MainWindow(void) : m_pViewerQT(0), m_pMap(0)
 	m_pSectionLineAction = new QAction(QIcon("./icon/section.png"), QString::fromLocal8Bit("任意剖面图"), this);
 	m_pDistanctTestAction = new QAction(QIcon("./icon/distance.png"), QString::fromLocal8Bit("测量直线距离"), this);
 	m_pShowResultAction = new QAction(QIcon("./icon/show.png"), QString::fromLocal8Bit("察看结果"), this);
+	m_pExportRegionDataAction = new QAction(QIcon("./icon/export_file.png"), QString::fromLocal8Bit("导出选定区域"), this);
 
 	m_pPauseTrackAction->setCheckable(true);
 	m_pRestorePointerAction->setCheckable(true);
@@ -234,7 +235,7 @@ MainWindow::MainWindow(void) : m_pViewerQT(0), m_pMap(0)
 	m_pActionGroup->addAction(m_pSectionLineAction);
 	m_pActionGroup->addAction(m_pDistanctTestAction);
 	m_pActionGroup->addAction(m_pShowResultAction);
-
+	m_pActionGroup->addAction(m_pExportRegionDataAction);
 
 	//////////////////////////////////////////////////////////////////////////
 	addDockWidget(Qt::LeftDockWidgetArea, m_FileNameDockList);
@@ -421,6 +422,10 @@ void MainWindow::slot_ActionTriggered( QAction* action )
 				pQwtPlotDialog->Show(keys[i]);
 		}
 	}
+	else if(action == m_pExportRegionDataAction)
+	{
+		ExportRegionData();
+	}
 	else
 	{
 
@@ -526,7 +531,8 @@ void MainWindow::SetUpActions( QToolBar* pToolBar )
 	pToolBar->addAction(m_pDataInputSettingAction);
 	pToolBar->addAction(m_pShowResultAction);
 	pToolBar->addAction(m_pSaveResultAction);
-	
+	pToolBar->addAction(m_pExportRegionDataAction);
+	pToolBar->addSeparator();
 	pToolBar->addAction(m_pShutdownAction);
 	
 	//pToolBar->addAction(m_pExprotImageAction);
@@ -691,6 +697,30 @@ void MainWindow::ExportImage( const QString& fileName )
 {
 	m_SnapImageDrawCallback->setFileName(fileName.toStdString());
 	m_SnapImageDrawCallback->setSnapImageOnNextFrame(true);
+}
+
+void MainWindow::ExportRegionData()
+{
+	QItemSelectionModel* pISM = m_TrackBoxDockList->m_Setup.listView->selectionModel();
+	
+	QModelIndexList selectBoxes = pISM->selectedRows();
+	if(selectBoxes.size() <= 0)
+	{
+		QMessageBox::warning(this, QString::fromLocal8Bit("导出框"), QString::fromLocal8Bit("请选择导出框。（可多选）"));
+	}
+
+	QString strPath = QFileDialog::getExistingDirectory(this, QString::fromLocal8Bit("保存跟踪结果"));
+	if(strPath.size() == 0) return;
+
+	for(int i = 0; i < selectBoxes.size(); i++)
+	{
+		QStandardItem* item =  m_pTrackBoxItemModel->item(selectBoxes.at(i).row());
+		cube_data cd = g_GlobleConfig.GetCubeFromName(item->text());
+		QString strName = GetSelectFileName();
+		QString strFilePath = m_FileBaseMapToFilePath.value(strName);
+		QString strOutCSV = strPath + QDir::separator() + QString::fromLocal8Bit("_") + cd.name + strName + QString::fromLocal8Bit(".csv");
+		m_pControlorInterface->ExportPartNcFile(strFilePath, osg::Vec3(cd.left_top_lon, cd.left_top_lat, 0), osg::Vec3(cd.right_bottom_lon, cd.right_bottom_lat, 0), 0, strOutCSV);
+	}
 }
 
 void MainWindow::AddFileTime()

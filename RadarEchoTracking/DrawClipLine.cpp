@@ -146,6 +146,7 @@ void DrawClipLine::CreateLineGeometry()
 		pixmap = QPixmap::fromImage(*pImage);
 
 		s_pSectionImageDialog->UpdateImage(pixmap);
+		s_pSectionImageDialog->UpdateRelevantValue(m_pCI, m_FileName, p11.x(), p11.y(), p22.x(),p22.y());
 		//m_KeySwitch->selectMatrixManipulator(0);
 		delete pImage;
 		//dialog.exec();
@@ -154,7 +155,7 @@ void DrawClipLine::CreateLineGeometry()
 	}
 	else
 	{
-			m_KmText->setText("");
+		m_KmText->setText("");
 	}
 	m_DrawArrays->set(osg::PrimitiveSet::LINES, 0, 0);
 	m_pLine->dirtyDisplayList();

@@ -13,6 +13,7 @@ public:
 	bool handle( const osg::Vec3& pos, const osgGA::GUIEventAdapter& ea );
 	void SetLineMode(bool bM);
 	void SetFileName(const QString& fileName){m_FileName = fileName;}
+
 protected:
 	QString m_FileName;
 	virtual void CreateLineGeometry();

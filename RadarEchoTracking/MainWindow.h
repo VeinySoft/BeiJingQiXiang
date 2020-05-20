@@ -74,6 +74,7 @@ public:
 	int StartTrack2();
 	void StartReplay();
 	void DisplayPlot();
+	void ExportRegionData();
 
 	int GetTrackFileID(QPair<QString, QString>& filePair, int iType = 0);
 	QString& GetTrackFilePath(const QString& strID);
@@ -168,6 +169,8 @@ private:
 	QAction* m_pSectionLineAction;
 	QAction* m_pDistanctTestAction;
 	QAction* m_pShowResultAction;
+	QAction* m_pExportRegionDataAction;
+
 	osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> m_keySwitchMaipulator;
 	osg::ref_ptr<DrawGeometryManipulator> m_pDrawRectMainpulator;
 	osg::ref_ptr<DrawGeometryManipulator> m_pDrawLineMainpulator;
