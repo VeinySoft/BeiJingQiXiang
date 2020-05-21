@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <GraphicsControler_home>D:\Project\IDP_OLD2</GraphicsControler_home>
+    <GraphicsControler_home>E:\Project\IDP_OLD2</GraphicsControler_home>
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>GraphicsControlerDebug</_PropertySheetDisplayName>

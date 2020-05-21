@@ -170,6 +170,7 @@ private:
 	QAction* m_pDistanctTestAction;
 	QAction* m_pShowResultAction;
 	QAction* m_pExportRegionDataAction;
+	QAction* m_pOpenFlightPathAction;
 
 	osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> m_keySwitchMaipulator;
 	osg::ref_ptr<DrawGeometryManipulator> m_pDrawRectMainpulator;

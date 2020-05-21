@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <GDAL_HOME>D:\New_3D_SDK\gdal-1.11.0</GDAL_HOME>
+    <GDAL_HOME>E:\Project\New_3D_SDK\gdal-1.11.0</GDAL_HOME>
   </PropertyGroup>
   <PropertyGroup>
     <IncludePath>$(GDAL_HOME)\include;$(IncludePath)</IncludePath>
