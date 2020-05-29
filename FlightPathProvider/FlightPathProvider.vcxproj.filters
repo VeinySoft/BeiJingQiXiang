@@ -30,6 +30,12 @@
     <ClInclude Include="FlightPath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FlightPathControler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FlightPathControlerImps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FlightPath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FlightPathControlerImps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

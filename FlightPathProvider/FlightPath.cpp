@@ -23,6 +23,7 @@ void FlightPath::CreateOsgFromGeos(osg::Node* pNode)
 	if(pGroup)
 	{
 		osg::ref_ptr<osg::Geometry> pFlightLine = new osg::Geometry;
+		osg::ref_ptr<osg::LineWidth> lineWid = new osg::LineWidth(3.0f);
 
 		osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array;
 		for(int i = 0; i < m_pLonLatArray->size(); i++)
@@ -43,7 +44,10 @@ void FlightPath::CreateOsgFromGeos(osg::Node* pNode)
 		colors->push_back(m_pParentLayer->GetLayerColor());
 		pFlightLine->setColorArray(colors, osg::Array::BIND_OVERALL);
 
-		pFlightLine->addPrimitiveSet(new osg::DrawArrays(GL_LINES, 0, vertex->size()));
+		pFlightLine->addPrimitiveSet(new osg::DrawArrays(GL_LINE_LOOP, 0, vertex->size()));
+
+		osg::ref_ptr<osg::StateSet> stateset = m_pGeode->getOrCreateStateSet();
+		stateset->setAttribute(lineWid);
 
 		m_pGeode->addDrawable(pFlightLine);
 		pGroup->addChild(m_pGeode);

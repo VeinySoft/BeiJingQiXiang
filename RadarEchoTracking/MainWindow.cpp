@@ -22,6 +22,7 @@
 #include "QwtPlotDialogImps.h"
 #include "ConfigAccesser.h"
 #include "DrawClipLine.h"
+#include "FlightAndRasterWindow.h"
 #include <math.h>
 
 #define distance(x1,x2,y1,y2) sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
@@ -206,6 +207,7 @@ MainWindow::MainWindow(void) : m_pViewerQT(0), m_pMap(0)
 	m_pDistanctTestAction = new QAction(QIcon("./icon/distance.png"), QString::fromLocal8Bit("测量直线距离"), this);
 	m_pShowResultAction = new QAction(QIcon("./icon/show.png"), QString::fromLocal8Bit("察看结果"), this);
 	m_pExportRegionDataAction = new QAction(QIcon("./icon/export_file.png"), QString::fromLocal8Bit("导出选定区域"), this);
+	m_pOpenFlightPathAction = new QAction(QIcon("./icon/flightPath.png"), QString::fromLocal8Bit("加载飞行轨迹"), this);
 
 	m_pPauseTrackAction->setCheckable(true);
 	m_pRestorePointerAction->setCheckable(true);
@@ -236,7 +238,7 @@ MainWindow::MainWindow(void) : m_pViewerQT(0), m_pMap(0)
 	m_pActionGroup->addAction(m_pDistanctTestAction);
 	m_pActionGroup->addAction(m_pShowResultAction);
 	m_pActionGroup->addAction(m_pExportRegionDataAction);
-
+	m_pActionGroup->addAction(m_pOpenFlightPathAction);
 	//////////////////////////////////////////////////////////////////////////
 	addDockWidget(Qt::LeftDockWidgetArea, m_FileNameDockList);
 	addDockWidget(Qt::LeftDockWidgetArea, m_TrackBoxDockList);
@@ -269,6 +271,7 @@ MainWindow::MainWindow(void) : m_pViewerQT(0), m_pMap(0)
 
 	connect(m_NcFileLayerDockCheckBox->GetCheckBoxGroup(), SIGNAL(buttonClicked(int)), SLOT(slot_SelectLayer(int)));
 	connect(m_FileNameDockList->m_Setup.listView, SIGNAL(doubleClicked( const QModelIndex&)), SLOT(slot_doubleClicked(const QModelIndex&)));
+	connect(m_FileNameDockList->m_Setup.listView, SIGNAL(clicked( const QModelIndex&)), SLOT(slot_NameListClicked(const QModelIndex&)));
 	connect(m_TrackBoxDockList->m_Setup.listView, SIGNAL(clicked(const QModelIndex&)), SLOT(slot_TrackListClicked(const QModelIndex&)));
 	//////////////////////////////////////////////////////////////////////////
 	connect(m_TrackBoxDockList->m_Setup.pushButton, SIGNAL(clicked(bool)), SLOT(slot_AddBox(bool)));
@@ -426,6 +429,36 @@ void MainWindow::slot_ActionTriggered( QAction* action )
 	{
 		ExportRegionData();
 	}
+	else if(m_pOpenFlightPathAction == action)
+	{
+		if(m_FileList.size() <= 0) return;
+
+		QString strFileName = QFileDialog::getOpenFileName(this
+			, QString::fromLocal8Bit("打开飞行轨迹"), "", "JPEG (*.csv)");
+		if(strFileName.size() > 0)
+		{
+			LoadFlightPath(strFileName);
+
+
+			static FlightAndRasterWindow* pRasterWindow = 0;
+			if(pRasterWindow == 0)
+			{
+				pRasterWindow = new FlightAndRasterWindow(m_FlightPathControler, m_pControlorInterface);
+				pRasterWindow->SetMapToFilePath(&m_FileBaseMapToFilePath);
+
+				connect(this, SIGNAL(signal_SelectFiles(const QStringList&)), pRasterWindow, SLOT(slot_updateSelectNcFiles(const QStringList&)));
+			}
+			
+			QStringList ncFilesList;
+			ncFilesList.push_back(m_FileList[0]);
+			ncFilesList.push_back(m_FileList[m_FileList.size() - 1]);
+			pRasterWindow->slot_updateSelectNcFiles(ncFilesList);
+			pRasterWindow->show();
+
+			pRasterWindow->FillList();
+
+		}
+	}
 	else
 	{
 
@@ -530,8 +563,10 @@ void MainWindow::SetUpActions( QToolBar* pToolBar )
 	pToolBar->addAction(m_pDistanctTestAction);
 	pToolBar->addAction(m_pDataInputSettingAction);
 	pToolBar->addAction(m_pShowResultAction);
+	pToolBar->addSeparator();
 	pToolBar->addAction(m_pSaveResultAction);
 	pToolBar->addAction(m_pExportRegionDataAction);
+	pToolBar->addAction(m_pOpenFlightPathAction);
 	pToolBar->addSeparator();
 	pToolBar->addAction(m_pShutdownAction);
 	
@@ -1800,6 +1835,30 @@ void MainWindow::closeEvent( QCloseEvent* event )
 		//pD->->close();
 	}
 }
+void MainWindow::slot_NameListClicked(const QModelIndex& index)
+{
+	QItemSelectionModel* pISM = m_FileNameDockList->m_Setup.listView->selectionModel();
+
+	QModelIndexList mil = pISM->selectedRows();
+
+	if(mil.size() >= 2)
+	{
+		QModelIndex first = mil.at(0);
+		QModelIndex tail = mil.at(mil.size() - 1);
+
+		QStandardItem* pItem1 = m_pFileListItemModel->item(first.row());
+		QStandardItem* pItem2 = m_pFileListItemModel->item(tail.row());
+
+		QStringList selectPairNames;
+
+		selectPairNames.push_back(pItem1->text());
+		selectPairNames.push_back(pItem2->text());
+
+		emit signal_SelectFiles(selectPairNames);
+	}
+	
+	
+}
 
 void MainWindow::slot_doubleClicked( const QModelIndex& index )
 {
@@ -2113,6 +2172,25 @@ void MainWindow::LoadPaoDian()
 
 	pPaoDinaControlerInterface->HideAll();
 
+}
+
+void MainWindow::LoadFlightPath(const QString& fileName)
+{
+	std::string layerName = QString::fromLocal8Bit("FlightPathLayer").toStdString();
+	m_pMap->RemoveLayer(layerName);
+	goto_gis::GeosOnTheOsg* pGOTO = goto_gis::GeosOnTheOsg::Instantiate();
+	goto_gis::Layer* pLayer = new goto_gis::VectorLayer(0, 0, 1);
+
+	pGOTO->OpenDataAsLayer(fileName.toStdString(), pLayer);
+	pLayer->CoordTrans(m_pMap->GetCoordinateTransform());
+	pLayer->Visible(true);
+	pLayer->LayerZ(-20);
+	pLayer->SetLayerColor(osg::Vec4(180/255.0, 0, 0, 1));
+	pLayer->CreateLayerData();
+	
+	m_pMap->AddLayer(layerName, pLayer);
+
+	m_FlightPathControler = static_cast<FlightPathControler*>(pLayer->GetDataProvider()->GetExtendInterface(0));
 }
 
 void MainWindow::FileListScrollButton()

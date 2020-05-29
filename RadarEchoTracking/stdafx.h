@@ -38,4 +38,6 @@
 #include "../NetCDFDataProvider/ControlorInterface.h"
 #include "../NetCDFDataProvider/SetCubesInterface.h"
 #include "../PaoDianProvider/PaoDinaControlerInterface.h"
+#include "../FlightPathProvider/FlightPathControler.h"
+#include "../QwtRasterPolt/MemoryData.h"
 // TODO: reference additional headers your program requires here

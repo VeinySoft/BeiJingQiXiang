@@ -394,3 +394,13 @@ int ControlorImps::ExportSctionFile(const QString& strName, osg::Vec3 p1, osg::V
 
 	return iR;
 }
+
+int ControlorImps::GetVerticalData(const std::string& strName, osg::Vec3Array& vec3Array, osg::Vec3 p2, double* pData, size_t* pSize)
+{
+	NcFile ncFile(strName.c_str());
+	MakeTextureImps mti(m_pNetCDFDataProvider->m_pParentLayer->CoordTrans());
+	int iR = mti.GetVerticalData(&ncFile, vec3Array, p2, pData, pSize);
+	ncFile.close();
+
+	return iR;
+}

@@ -15,6 +15,7 @@ class QwtPlotDialogImps;
 class QwtScaleDraw;
 class MainWindow;
 class DrawClipLine;
+class FlightPathControler;
 
 class MySlaveThread : public QThread
 {
@@ -54,6 +55,7 @@ public:
 		m_pTrackBoxSettingAction->setChecked(true);
 	}
 	void LoadPaoDian();
+	void LoadFlightPath(const QString& fileName);
 	inline void SetHandCursor(){
 		QPixmap pix("./icon/hand.png");
 		m_pViewerQT->setCursor(Qt::WaitCursor);}
@@ -110,6 +112,7 @@ public:
 	void FileListScrollButton();
 signals:
 	void signal_InsertFile(const QString& fileBase);
+	void signal_SelectFiles(const QStringList& fileNames);
 
 public Q_SLOTS:
 	void slot_ActionTriggered( QAction* action );
@@ -119,6 +122,7 @@ public Q_SLOTS:
 	void slot_InsertFile(const QString& fileBase);
 	void slot_SelectLayer(int index);
 	void slot_doubleClicked(const QModelIndex& index);
+	void slot_NameListClicked(const QModelIndex& index);
 	void slot_TrackListClicked(const QModelIndex& index);
 	void slot_StopTrack();
 	void slot_DeleteBox(bool);
@@ -189,6 +193,7 @@ private:
 	NcFileLayerDockCheckBox* m_NcFileLayerDockCheckBox;
 	PaoDianDockWidget* m_PaoDianDockWidget;
 	ControlorInterface* m_pControlorInterface;
+	FlightPathControler* m_FlightPathControler;
 	SetCubesInterface* m_pSetCubesInterface;
 	QStandardItemModel* m_pFileListItemModel;
 	QStandardItemModel* m_pTrackBoxItemModel;

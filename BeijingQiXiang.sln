@@ -2,10 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RadarEchoTracking", "RadarEchoTracking\RadarEchoTracking.vcxproj", "{48729C8C-E26B-4C66-B227-DB1CB39D1587}"
-	ProjectSection(ProjectDependencies) = postProject
-		{FD786019-C370-4EFD-8E53-44C35390E5E5} = {FD786019-C370-4EFD-8E53-44C35390E5E5}
-		{33083EE8-70A8-4987-ADF0-CE63275196AD} = {33083EE8-70A8-4987-ADF0-CE63275196AD}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetCDFDataProvider", "NetCDFDataProvider\NetCDFDataProvider.vcxproj", "{FD786019-C370-4EFD-8E53-44C35390E5E5}"
 EndProject
@@ -16,6 +12,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PaoDianProvider", "PaoDianProvider\PaoDianProvider.vcxproj", "{33083EE8-70A8-4987-ADF0-CE63275196AD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlightPathProvider", "FlightPathProvider\FlightPathProvider.vcxproj", "{788BF1B8-00E7-4F31-9F0D-FB97F5E055C4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QwtRasterPolt", "QwtRasterPolt\QwtRasterPolt.vcxproj", "{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,6 +88,15 @@ Global
 		{788BF1B8-00E7-4F31-9F0D-FB97F5E055C4}.X64Debug|Win32.ActiveCfg = Debug|Win32
 		{788BF1B8-00E7-4F31-9F0D-FB97F5E055C4}.X64Debug|Win32.Build.0 = Debug|Win32
 		{788BF1B8-00E7-4F31-9F0D-FB97F5E055C4}.X64Debug|x64.ActiveCfg = Debug|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.Debug|Win32.Build.0 = Debug|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.Debug|x64.ActiveCfg = Debug|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.Release|Win32.ActiveCfg = Release|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.Release|Win32.Build.0 = Release|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.Release|x64.ActiveCfg = Release|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.X64Debug|Win32.ActiveCfg = Debug|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.X64Debug|Win32.Build.0 = Debug|Win32
+		{A9E524EF-ED51-4DDF-BF7B-CFCFF99F8995}.X64Debug|x64.ActiveCfg = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

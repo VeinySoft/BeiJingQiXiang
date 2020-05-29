@@ -88,6 +88,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FlightPath.h" />
+    <ClInclude Include="FlightPathControler.h" />
+    <ClInclude Include="FlightPathControlerImps.h" />
     <ClInclude Include="FlightPathProvider.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -102,6 +104,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="FlightPath.cpp" />
+    <ClCompile Include="FlightPathControlerImps.cpp" />
     <ClCompile Include="FlightPathProvider.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

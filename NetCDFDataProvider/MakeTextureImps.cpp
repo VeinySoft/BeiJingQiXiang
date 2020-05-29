@@ -1626,7 +1626,140 @@ int MakeTextureImps::ExportSectionFile(NcFile *pNcFile, osg::Vec3 p1, osg::Vec3 
 		}
 	}
 
-	
+	return 1;
+}
 
+int MakeTextureImps::GetVerticalData(NcFile *pNcFile, osg::Vec3Array& vec3Array, osg::Vec3 p2, double* pData, size_t* pSize )
+{
+	if(pData == NULL && pSize == NULL) return -1;
+
+	long m_x, m_y, m_z;
+	int lonFistIndex(0), latFistIndex(0), lonLastIndex(0), latLastIndex(0);
+	//获得维度
+	const int iDims = pNcFile->num_dims();
+	for(int i = 0; iDims > i; i++)
+	{
+		NcDim* pNcDim = pNcFile->get_dim(i);
+		std::string strDimName = pNcDim->name();
+		if(strDimName == "longtitude")
+		{
+			m_x = pNcDim->size();
+		}
+		else if(strDimName == "latitude")
+		{
+			m_y = pNcDim->size();
+		}
+		else if(strDimName == "layer")
+		{
+			m_z = pNcDim->size();
+		}
+		else
+		{
+			//pNcFile->close();
+			return 0;
+		}
+	}
+
+	if(pData == NULL)
+	{
+		*pSize = m_z;
+		return 2;
+	}
+	//获得属性
+	const int iAtts = pNcFile->num_atts();
+
+	float fFirstLon = 0;
+	float fFirstLat = 0;
+	float fLastLon = 0;
+	float fLastLat = 0;
+
+	for(int i = 0; iAtts > i; i++)
+	{
+		NcAtt* pNcAtt = pNcFile->get_att(i);
+		std::string strAttName = pNcAtt->name();
+		if(strAttName.find("FirstLon") != std::string::npos)
+		{
+			fFirstLon = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("FirstLat") != std::string::npos)
+		{
+			fFirstLat = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("LastLon") != std::string::npos)
+		{
+			fLastLon = pNcAtt->as_float(0);
+		}
+		else if(strAttName.find("LastLat") != std::string::npos)
+		{
+			fLastLat = pNcAtt->as_float(0);
+		}
+	}
+
+	size_t arraySize = vec3Array.size();
+
+	const int iVars = pNcFile->num_vars();
+	for(int i = 0; i < iVars; ++i)
+	{
+		NcVar* pVar =  pNcFile->get_var(i);
+		if(!pVar)
+		{
+			return 0;
+		}
+		QString name = pVar->name();
+
+		if(name == QString::fromLocal8Bit("reflectivity"))
+		{
+			ncbyte pValue = -100;
+
+			for(int i = 0; i < arraySize; i++)
+			{
+				osg::Vec3 p1 = vec3Array.at(i);
+				lonFistIndex = (p1.x() - fFirstLon)/0.01;
+				latFistIndex = (p1.y() - fFirstLat)/0.01;
+
+				if(lonFistIndex < 0 || latLastIndex < 0) continue;
+
+				pData += m_z;
+
+				for(int ii = 0; m_z > ii; ii++)
+				{
+					long lCur[3] = {0};
+					lCur[0] = ii;
+
+					long laCount[3] = {0};
+					laCount[0] = 1;
+					laCount[1] = 1;
+					laCount[2] = 1;
+
+					lCur[1] = latFistIndex;
+					lCur[2] = lonFistIndex;
+					pVar->set_cur(lCur);
+					pVar->get(&pValue, laCount);
+
+					ncbyte shN = pValue;
+
+					if(shN == 0 || shN == 1 || shN == 2 || shN == 3)
+						continue;
+
+					ncbyte realValue = 0xee;
+
+					if(shN < 0)
+					{
+						realValue = -33 + 0.5 * (256 + shN);
+					}
+					else
+					{
+						realValue = -33 + 0.5 * shN;
+					}
+
+					pData[ii]  = realValue;
+				}
+
+			}
+			
+		}
+	}
+	
+	
 	return 1;
 }

@@ -47,6 +47,7 @@ public:
 	virtual QImage* GetSectionNcFile( const std::string& strName, osg::Vec3 p1, osg::Vec3 p2 ) = 0;
 	virtual int ExportPartNcFile(const QString& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile) = 0;
 	virtual int ExportSctionFile(const QString& strName, osg::Vec3 p1, osg::Vec3 p2, int iMode, const QString& strExortFile) = 0;
+	virtual int GetVerticalData(const std::string& strName, osg::Vec3Array& vec3Array, osg::Vec3 p2, double* pData, size_t* pSize ) = 0;
 	//virtual void SectionFile(std::string& name);
 };
 

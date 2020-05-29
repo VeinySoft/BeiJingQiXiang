@@ -3,7 +3,12 @@
 #include "stdafx.h"
 #include "FlightPathProvider.h"
 #include "FlightPath.h"
+#include "FlightPathControlerImps.h"
 
+FlightPathProvider::FlightPathProvider()  : m_lonlatArray(new osg::Vec3Array), m_pFlightPathControler(new FlightPathControlerImps(this))
+{
+	this->InsertExtendInterface(m_pFlightPathControler);
+}
 bool FlightPathProvider::LoadFile(const std::string& filename)
 {
 	QFile file(filename.c_str());
@@ -11,26 +16,24 @@ bool FlightPathProvider::LoadFile(const std::string& filename)
 
 	QTextStream ts(&file);
 	
-
-	osg::ref_ptr<osg::Vec3Array> lonlatArray = new osg::Vec3Array;
 	while(!ts.atEnd())
 	{
 		QString strLine = ts.readLine();
-		QStringList strDataList = strLine.split(" ");
+		QStringList strDataList = strLine.split(',');
 		if(strDataList.length() != 5) return false;
 		m_strDataList.push_back(strDataList[0].simplified());
 		m_strTimeList.push_back(strDataList[1].simplified());
 
 		QString strX, strY, strZ;
-		strX = strDataList[2].simplified();
-		strY = strDataList[3].simplified();
+		strX = strDataList[3].simplified();
+		strY = strDataList[2].simplified();
 		strZ = strDataList[4].simplified();
 
-		double dx(strX.toInt()),dy(strY.toInt()),dz(strZ.toInt());
-		lonlatArray->push_back(osg::Vec3(dx, dy, dz));
+		double dx(strX.toDouble()),dy(strY.toDouble()),dz(strZ.toInt());
+		m_lonlatArray->push_back(osg::Vec3(dx, dy, dz));
 	}
 
-	FlightPath* pFP = new FlightPath(lonlatArray);
+	FlightPath* pFP = new FlightPath(m_lonlatArray);
 	this->ParentLayer()->GetMgoGeometry()->insert(goto_gis::Layer::MgoGeometryPair(0, pFP));
 	return false;
 }

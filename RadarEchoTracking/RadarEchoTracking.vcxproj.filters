@@ -126,6 +126,9 @@
     <ClInclude Include="GeneratedFiles\ui_SectionDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_FlightAndRaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -236,6 +239,12 @@
     <ClCompile Include="GeneratedFiles\moc_SectionImageDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FlightAndRasterWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\moc_FlightAndRasterWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.ui">
@@ -293,6 +302,12 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="SectionImageDialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="FlightAndRaster.ui">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="FlightAndRasterWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
