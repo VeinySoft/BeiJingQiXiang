@@ -2184,6 +2184,7 @@ void MainWindow::LoadFlightPath(const QString& fileName)
 	pGOTO->OpenDataAsLayer(fileName.toStdString(), pLayer);
 	pLayer->CoordTrans(m_pMap->GetCoordinateTransform());
 	pLayer->Visible(true);
+	pLayer->SetLineWidth(3);
 	pLayer->LayerZ(-20);
 	pLayer->SetLayerColor(osg::Vec4(180/255.0, 0, 0, 1));
 	pLayer->CreateLayerData();

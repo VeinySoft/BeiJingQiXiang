@@ -33,8 +33,8 @@ bool FlightPathProvider::LoadFile(const std::string& filename)
 		m_lonlatArray->push_back(osg::Vec3(dx, dy, dz));
 	}
 
-	FlightPath* pFP = new FlightPath(m_lonlatArray);
-	this->ParentLayer()->GetMgoGeometry()->insert(goto_gis::Layer::MgoGeometryPair(0, pFP));
+	m_pFlightPath = new FlightPath(m_lonlatArray);
+	this->ParentLayer()->GetMgoGeometry()->insert(goto_gis::Layer::MgoGeometryPair(0, m_pFlightPath));
 	return false;
 }
 

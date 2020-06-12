@@ -8,6 +8,7 @@
 
 
 FlightPath::FlightPath(osg::Vec3Array* pVA) : m_pLonLatArray(pVA), m_pCoordinateTransform(0), m_pGeode(new osg::Geode)
+	, m_pColorArray(new osg::Vec4Array), m_pFlightLine(new osg::Geometry)
 {
 
 }
@@ -22,11 +23,10 @@ void FlightPath::CreateOsgFromGeos(osg::Node* pNode)
 	
 	if(pGroup)
 	{
-		osg::ref_ptr<osg::Geometry> pFlightLine = new osg::Geometry;
 		osg::ref_ptr<osg::LineWidth> lineWid = new osg::LineWidth(3.0f);
 
 		osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array;
-		for(int i = 0; i < m_pLonLatArray->size(); i++)
+		for(size_t i = 0; i < m_pLonLatArray->size(); i++)
 		{
 			osg::Vec3 PosTemp;
 			osg::Vec3 v3pos(m_pLonLatArray->at(i).x(), m_pLonLatArray->at(i).y(), 0);
@@ -34,22 +34,23 @@ void FlightPath::CreateOsgFromGeos(osg::Node* pNode)
 			m_pCoordinateTransform->Transform(v3pos, PosTemp);
 			vertex->push_back(PosTemp);
 		}
-		pFlightLine->setVertexArray(vertex);
+		m_pFlightLine->setVertexArray(vertex);
 
 		osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array(1);
 		(*normals)[0].set(1.0f,0.0f,0.0f);
-		pFlightLine->setNormalArray(normals, osg::Array::BIND_OVERALL);
+		m_pFlightLine->setNormalArray(normals, osg::Array::BIND_OVERALL);
 
-		osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
-		colors->push_back(m_pParentLayer->GetLayerColor());
-		pFlightLine->setColorArray(colors, osg::Array::BIND_OVERALL);
+		//osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+		for(size_t i = 0; i < vertex->size(); i ++)
+		{
+			m_pColorArray->push_back(m_pParentLayer->GetLayerColor());
+		}
+		m_pFlightLine->setColorArray(m_pColorArray, osg::Array::BIND_PER_VERTEX);
 
-		pFlightLine->addPrimitiveSet(new osg::DrawArrays(GL_LINE_LOOP, 0, vertex->size()));
+		m_pFlightLine->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP, 0, vertex->size()));
+		//m_pFlightLine->getOrCreateStateSet()->setAttribute(lineWid, osg::StateAttribute::ON);
 
-		osg::ref_ptr<osg::StateSet> stateset = m_pGeode->getOrCreateStateSet();
-		stateset->setAttribute(lineWid);
-
-		m_pGeode->addDrawable(pFlightLine);
+		m_pGeode->addDrawable(m_pFlightLine);
 		pGroup->addChild(m_pGeode);
 	}
 	else
@@ -72,4 +73,16 @@ geom::GeometryTypeId FlightPath::GetGeometryType()
 
 void FlightPath::TransformGeometry()
 {
+}
+
+void FlightPath::SetPartColor(const osg::Vec4& color, size_t iStart, size_t iCount)
+{
+	for(size_t i = 0; i < iCount; i++)
+	{
+		(*m_pColorArray)[iStart + i] = color;
+	}
+
+	m_pFlightLine->dirtyBound();
+	m_pFlightLine->dirtyDisplayList();
+	//m_pFlightLine->
 }
